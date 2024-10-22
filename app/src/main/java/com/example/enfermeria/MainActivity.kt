@@ -3,20 +3,23 @@ package com.example.enfermeria
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import com.example.enfermeria.data.model.Enfermera
 import com.example.enfermeria.repository.EnfermeraRepository
 import com.example.enfermeria.services.FirebaseService
+import com.example.enfermeria.ui.screens.ConsultaRegistrosScreen
 import com.example.enfermeria.ui.theme.EnfermeriaTheme
-import com.example.recordatorio.screens.LoginScreen
+import com.example.enfermeria.ui.theme.enfermera.EliminarRegistroScreen
 import com.example.recordatorio.services.UserService
+import com.example.recordatorio.ui.theme.screens.LoginScreen
 
 class MainActivity : ComponentActivity() {
 
     private val firebaseService = FirebaseService()
     private val userService = UserService(firebaseService)
+    private val enfermeraRepository = EnfermeraRepository(firebaseService)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,22 +27,49 @@ class MainActivity : ComponentActivity() {
         firebaseService.initialize() // Inicializar Firebase
 
         setContent {
-            var currentScreen by remember { mutableStateOf(Screen.Login) }
-            var enfermeras by remember { mutableStateOf(emptyList<Enfermera>()) }
+            // Especificar el tipo explícitamente para evitar errores de tipo
+            var currentScreen by remember { mutableStateOf<Screen>(Screen.Login) }
+            var enfermeras by remember { mutableStateOf<List<Enfermera>>(emptyList()) }
             var enfermeraToDelete by remember { mutableStateOf<Enfermera?>(null) }
 
             EnfermeriaTheme {
-                Column(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
                     when (currentScreen) {
-                        Screen.Login -> {
+                        is Screen.Login -> {
                             LoginScreen(
-                                onLoginSuccess = { },
+                                onLoginClick = {
+                                    // Acción al iniciar sesión
+                                    currentScreen = Screen.EnfermeraList
+                                    loadEnfermeras() // Cargar enfermeras después del inicio de sesión
+                                },
+                                onRecoverClick = {
+                                    // Acción para recuperar contraseña
+                                    // Ejemplo: Redirigir a pantalla de recuperación
+                                },
                                 userService = userService
+                            )
+                        }
+                        is Screen.EnfermeraList -> {
+                            ConsultaRegistrosScreen(
+                                registros = enfermeras,
+                                firebaseService = firebaseService
+                            )
+                        }
+                        is Screen.EliminarEnfermera -> {
+                            EliminarRegistroScreen(
+                                enfermera = (currentScreen as Screen.EliminarEnfermera).enfermera,
+                                onBackClick = { currentScreen = Screen.EnfermeraList } // Navegación de vuelta
                             )
                         }
                     }
                 }
             }
+        }
+    }
+
+    private fun loadEnfermeras() {
+        enfermeraRepository.getEnfermeras { enfermerasList ->
+            enfermeras = enfermerasList
         }
     }
 }

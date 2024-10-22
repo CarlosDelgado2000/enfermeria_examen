@@ -1,48 +1,72 @@
-package com.example.recordatorio.screens
+package com.example.recordatorio.ui.theme.screens
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import android.widget.Toast
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import com.example.recordatorio.services.UserService
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @Composable
-fun LoginScreen(userService: UserService, onLoginSuccess: () -> Unit) {
+fun LoginScreen(
+    onLoginClick: () -> Unit,
+    onRecoverClick: () -> Unit,
+    userService: UserService
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Inicio de Sesión")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         TextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") }
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         TextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") }
+            label = { Text("Contraseña") }
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(onClick = {
-            userService.verifyUser(email, password) { success, error ->
-                if (success) {
-                    onLoginSuccess()
-                } else {
-                    errorMessage = error ?: "Error al iniciar sesión"
+            Firebase.auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        onLoginClick() // Sin parámetros
+                    } else {
+                        Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
-            }
         }) {
-            Text("Login")
+            Text(text = "Iniciar Sesión")
         }
-        errorMessage?.let {
-            Text(it)
+
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = onRecoverClick) {
+            Text(text = "Recuperar Contraseña")
         }
     }
 }

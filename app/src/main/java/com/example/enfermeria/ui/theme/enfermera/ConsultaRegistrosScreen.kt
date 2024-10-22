@@ -1,47 +1,55 @@
 package com.example.enfermeria.ui.screens
 
-/*import Registro
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.enfermeria.data.model.Enfermera
 import com.example.enfermeria.services.FirebaseService
 
 @Composable
 fun ConsultaRegistrosScreen(
-    registros: List<Registro>,
+    registros: List<Enfermera>,
     firebaseService: FirebaseService
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Lista de Registros", modifier = Modifier.padding(16.dp))
+        Text(
+            text = "Lista de Registros",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
         if (registros.isEmpty()) {
-            Text("No hay registros disponibles")
+            Text(text = "No hay registros disponibles", style = MaterialTheme.typography.bodyMedium)
         } else {
-            LazyColumn {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(registros) { registro ->
-                    ListItem(
-                        text = {
-                            Text(text = registro.descripcion)
-                        },
-                        secondaryText = {
-                            Text(text = "Fecha: ${registro.fecha}")
-                        },
-                        modifier = Modifier.padding(8.dp)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "Descripción: ${registro.descripcion}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "Fecha: ${registro.fecha}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    }
                 }
             }
         }
     }
 }
-*/
